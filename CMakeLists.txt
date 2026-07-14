@@ -29,6 +29,7 @@ add_executable(${TARGET}
     src/audio_utils.cpp
     src/audio_capture.cpp
     src/commands.cpp
+    src/uinput.cpp
     )
 
 target_include_directories(${TARGET} PRIVATE

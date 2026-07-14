@@ -5,6 +5,7 @@
 #include "audio_capture.h"
 #include "audio_utils.h"
 #include "commands.h"
+#include "uinput.h"
 #include "whisper.h"
 
 #include <chrono>
@@ -42,9 +43,10 @@ struct whisper_params {
     bool print_special = false;
     bool tinydiarize   = false;
     bool save_audio    = false; // save audio to wav file
-    bool use_gpu       = true;
-    bool flash_attn    = true;
-    int32_t gpu_device = 0;
+    bool use_gpu        = true;
+    bool flash_attn     = true;
+    int32_t gpu_device  = 0;
+    bool uinput_enabled = false; // type transcribed text via uinput virtual keyboard
 
     std::string language = "en";
     std::string model    = "models/ggml-base.en.bin";
@@ -92,6 +94,7 @@ static bool whisper_params_parse(int argc, char ** argv, whisper_params & params
         else if (arg == "-cm"   || arg == "--commands")      { params.commands_file = argv[++i]; }
         else if (arg == "-d"    || arg == "--detail")        { params.print_details = true; }
         else if (arg == "-ns"   || arg == "--no-status")     { params.print_status = false; }
+        else if (arg == "-ui"   || arg == "--uinput")        { params.uinput_enabled = true; }
         else {
             fprintf(stderr, "error: unknown argument: %s\n", arg.c_str());
             whisper_print_usage(argc, argv, params);
@@ -132,6 +135,7 @@ void whisper_print_usage(int /*argc*/, char ** argv, const whisper_params & para
     fprintf(stderr, "  -d,        --detail         [%-7s] print transcription details (headers, timestamps)\n", params.print_details ? "true" : "false");
     fprintf(stderr, "  -ns,       --no-status      disable status indicator\n");
     fprintf(stderr, "  -cm FNAME, --commands FNAME [none] voice command configuration file\n");
+    fprintf(stderr, "  -ui,       --uinput         type transcribed text via uinput virtual keyboard\n");
     fprintf(stderr, "\n");
 }
 
@@ -225,6 +229,16 @@ int main(int argc, char ** argv) {
         }
     }
     vad_state.vad_gain = params.vad_gain;
+
+    // Initialize uinput device if requested
+    int uinput_fd = -1;
+    if (params.uinput_enabled) {
+        uinput_fd = uinput::setup();
+        if (uinput_fd < 0) {
+            fprintf(stderr, "%s: failed to initialize uinput, disabling uinput output\n", __func__);
+            params.uinput_enabled = false;
+        }
+    }
 
     int n_iter = 0;
     bool is_running = true;
@@ -346,6 +360,9 @@ int main(int argc, char ** argv) {
                             if (params.fname_out.length() > 0) {
                                 fout << "\n";
                             }
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                uinput::type_newline(uinput_fd);
+                            }
                             break;
                     }
                     // Command executed — don't print the segment text
@@ -384,6 +401,18 @@ int main(int argc, char ** argv) {
 
                 if (params.fname_out.length() > 0) {
                     fout << output;
+                }
+
+                // Send to uinput device if enabled — strip the trailing newline
+                // and append a space so segments stay on one line until the
+                // "new line" command types Enter.
+                if (params.uinput_enabled && uinput_fd >= 0) {
+                    std::string uinput_text = output;
+                    if (!uinput_text.empty() && uinput_text.back() == '\n') {
+                        uinput_text.pop_back();
+                    }
+                    uinput_text += ' ';
+                    uinput::type_string(uinput_fd, uinput_text);
                 }
             }
 
@@ -508,6 +537,9 @@ int main(int argc, char ** argv) {
     }
 
     // Cleanup
+    if (uinput_fd >= 0) {
+        uinput::teardown(uinput_fd);
+    }
     stream_vad_free(vad_state);
     audio.pause();
 
