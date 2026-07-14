@@ -14,6 +14,17 @@
 #include <thread>
 #include <vector>
 
+// Suppress whisper.cpp INFO logs, keeping only WARN and ERROR.
+// whisper_log_set() replaces the global log callback, so it intercepts
+// both whisper-level and ggml-level log output (it calls ggml_log_set() internally).
+static void cb_log_suppress_info(enum ggml_log_level level, const char *text, void *user_data) {
+    (void)user_data;
+    if (level >= GGML_LOG_LEVEL_WARN) {
+        fputs(text, stderr);
+        fflush(stderr);
+    }
+}
+
 // command-line parameters
 struct whisper_params {
     int32_t n_threads  = std::min(4, (int32_t) std::thread::hardware_concurrency());
@@ -125,6 +136,9 @@ void whisper_print_usage(int /*argc*/, char ** argv, const whisper_params & para
 }
 
 int main(int argc, char ** argv) {
+    // Suppress whisper.cpp INFO logs before any whisper/ggml operations
+    whisper_log_set(cb_log_suppress_info, NULL);
+
     ggml_backend_load_all();
 
     whisper_params params;
