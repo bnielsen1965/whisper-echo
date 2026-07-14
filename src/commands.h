@@ -13,6 +13,8 @@ enum class CommandAction {
     PAUSE_PRINT,   // Stop printing transcribed segments to stdout
     RESUME_PRINT,  // Resume printing transcribed segments to stdout
     NEW_LINE,      // Print a blank line to stdout/output file
+    BACKSPACE,     // Type backspace N times (N from captured # parameter)
+    SPACE,         // Type space N times (N from captured # parameter)
 };
 
 /// A single voice command with human-readable name and trigger phrases.
@@ -20,6 +22,12 @@ struct Command {
     CommandAction action;
     std::string name;                       // e.g. "Pause Transcription"
     std::vector<std::string> triggers;      // Case-insensitive trigger strings
+};
+
+/// Result of matching transcribed text against registered commands.
+struct MatchResult {
+    const Command* command;           // nullptr if no match
+    std::vector<int> params;          // captured numeric values from # placeholders
 };
 
 /// Global flag: when true, segment text is not printed to stdout
@@ -38,8 +46,8 @@ public:
     bool load_from_file(const std::string & path);
 
     /// Match transcribed text against registered commands.
-    /// Returns a pointer to the matched Command, or nullptr if no match.
-    const Command* match(const std::string & text) const;
+    /// Returns a MatchResult containing the matched Command and any captured numeric parameters.
+    MatchResult match(const std::string & text) const;
 
     /// Access the full command list.
     const std::vector<Command>& commands() const { return commands_; }

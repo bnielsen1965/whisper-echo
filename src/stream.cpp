@@ -344,9 +344,9 @@ int main(int argc, char ** argv) {
                 const char * text = whisper_full_get_segment_text(ctx, i);
 
                 // --- Command matching ---
-                const Command * matched = CommandRegistry::instance().match(text);
-                if (matched != nullptr) {
-                    switch (matched->action) {
+                MatchResult result = CommandRegistry::instance().match(text);
+                if (result.command != nullptr) {
+                    switch (result.command->action) {
                         case CommandAction::PAUSE_PRINT:
                             g_print_paused.store(true);
                             break;
@@ -362,6 +362,22 @@ int main(int argc, char ** argv) {
                             }
                             if (params.uinput_enabled && uinput_fd >= 0) {
                                 uinput::type_newline(uinput_fd);
+                            }
+                            break;
+                        case CommandAction::BACKSPACE:
+                            if (!result.params.empty()) {
+                                int count = result.params[0];
+                                if (params.uinput_enabled && uinput_fd >= 0) {
+                                    uinput::type_backspaces(uinput_fd, count);
+                                }
+                            }
+                            break;
+                        case CommandAction::SPACE:
+                            if (!result.params.empty()) {
+                                int count = result.params[0];
+                                if (params.uinput_enabled && uinput_fd >= 0) {
+                                    uinput::type_spaces(uinput_fd, count);
+                                }
                             }
                             break;
                     }
