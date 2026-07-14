@@ -1,0 +1,17 @@
+{
+    "pause_print": [
+        "echo pause",
+        "omega pause",
+        "mega pause"
+    ],
+    "resume_print": [
+        "echo resume",
+        "omega resume",
+        "mega resume"
+    ],
+    "new_line": [
+        "echo new line",
+        "omega new line",
+        "mega new line"
+    ]
+}
