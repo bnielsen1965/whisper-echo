@@ -2,12 +2,23 @@
     "pause_print": [
         "echo pause",
         "omega pause",
-        "mega pause"
+        "mega pause",
+        "echo paws"
     ],
     "resume_print": [
         "echo resume",
         "omega resume",
         "mega resume"
+    ],
+    "stop_uinput": [
+        "echo stop input",
+        "omega stop input",
+        "mega stop input"
+    ],
+    "resume_uinput": [
+        "echo start input",
+        "omega start input",
+        "mega start input"
     ],
     "new_line": [
         "echo new line",

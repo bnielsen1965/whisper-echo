@@ -10,6 +10,7 @@
 using json = nlohmann::json;
 
 std::atomic<bool> g_print_paused{false};
+std::atomic<bool> g_uinput_paused{false};
 
 /* ------------------------------------------------------------------ */
 /*  CommandRegistry                                                    */
@@ -18,10 +19,16 @@ std::atomic<bool> g_print_paused{false};
 CommandRegistry::CommandRegistry() {
     commands_ = {
         { CommandAction::PAUSE_PRINT, "Pause Transcription",
-          { "echo pause" } },
+          { "echo pause", "echo paws" } },
 
         { CommandAction::RESUME_PRINT, "Resume Transcription",
           { "echo resume" } },
+
+        { CommandAction::STOP_UINPUT, "Stop uinput",
+          { "echo stop input" } },
+
+        { CommandAction::RESUME_UINPUT, "Resume uinput",
+          { "echo start input" } },
 
         { CommandAction::NEW_LINE, "New Line",
           { "echo new line" } },
@@ -99,6 +106,8 @@ bool CommandRegistry::load_from_file(const std::string & path) {
         auto action_name = [](const std::string & s) -> std::pair<CommandAction, std::string> {
             if (s == "pause_print") return { CommandAction::PAUSE_PRINT, "Pause Transcription" };
             if (s == "resume_print") return { CommandAction::RESUME_PRINT, "Resume Transcription" };
+            if (s == "stop_uinput") return { CommandAction::STOP_UINPUT, "Stop uinput" };
+            if (s == "resume_uinput") return { CommandAction::RESUME_UINPUT, "Resume uinput" };
             if (s == "new_line") return { CommandAction::NEW_LINE, "New Line" };
             if (s == "backspace") return { CommandAction::BACKSPACE, "Backspace N" };
             if (s == "space") return { CommandAction::SPACE, "Spaces N" };
@@ -137,6 +146,8 @@ bool CommandRegistry::load_from_file(const std::string & path) {
         std::vector<CommandAction> all_actions = {
             CommandAction::PAUSE_PRINT,
             CommandAction::RESUME_PRINT,
+            CommandAction::STOP_UINPUT,
+            CommandAction::RESUME_UINPUT,
             CommandAction::NEW_LINE,
             CommandAction::BACKSPACE,
             CommandAction::SPACE,

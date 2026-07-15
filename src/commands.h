@@ -10,11 +10,13 @@
 
 /// Action performed when a command is matched.
 enum class CommandAction {
-    PAUSE_PRINT,   // Stop printing transcribed segments to stdout
-    RESUME_PRINT,  // Resume printing transcribed segments to stdout
-    NEW_LINE,      // Print a blank line to stdout/output file
-    BACKSPACE,     // Type backspace N times (N from captured # parameter)
-    SPACE,         // Type space N times (N from captured # parameter)
+    PAUSE_PRINT,      // Stop printing transcribed segments to stdout
+    RESUME_PRINT,     // Resume printing transcribed segments to stdout
+    STOP_UINPUT,      // Stop sending transcribed segments to uinput
+    RESUME_UINPUT,    // Resume sending transcribed segments to uinput
+    NEW_LINE,         // Print a blank line to stdout/output file
+    BACKSPACE,        // Type backspace N times (N from captured # parameter)
+    SPACE,            // Type space N times (N from captured # parameter)
 };
 
 /// A single voice command with human-readable name and trigger phrases.
@@ -33,6 +35,9 @@ struct MatchResult {
 /// Global flag: when true, segment text is not printed to stdout
 /// (still written to output file if configured).
 extern std::atomic<bool> g_print_paused;
+
+/// Global flag: when true, transcribed segments are not sent to uinput
+extern std::atomic<bool> g_uinput_paused;
 
 /// Singleton registry of voice commands.
 /// Initialized with default pause/resume commands at first use.

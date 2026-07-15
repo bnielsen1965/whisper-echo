@@ -288,7 +288,14 @@ int main(int argc, char ** argv) {
                 break;
         }
         // \r to overwrite the same line; \33[K to clear to end of line
-        printf("\r\33[K [%s%s]", label, g_print_paused.load() ? " (p)" : "");
+        std::string indicator;
+        if (g_print_paused.load()) indicator += "p";
+        if (g_uinput_paused.load()) indicator += "Si";
+        if (!indicator.empty()) {
+            printf("\r\33[K [%s (%s)]", label, indicator.c_str());
+        } else {
+            printf("\r\33[K [%s]", label);
+        }
         fflush(stdout);
     };
 
@@ -352,6 +359,12 @@ int main(int argc, char ** argv) {
                             break;
                         case CommandAction::RESUME_PRINT:
                             g_print_paused.store(false);
+                            break;
+                        case CommandAction::STOP_UINPUT:
+                            g_uinput_paused.store(true);
+                            break;
+                        case CommandAction::RESUME_UINPUT:
+                            g_uinput_paused.store(false);
                             break;
                         case CommandAction::NEW_LINE:
                             ensure_off_status_line();
@@ -419,10 +432,10 @@ int main(int argc, char ** argv) {
                     fout << output;
                 }
 
-                // Send to uinput device if enabled — strip the trailing newline
-                // and append a space so segments stay on one line until the
-                // "new line" command types Enter.
-                if (params.uinput_enabled && uinput_fd >= 0) {
+                // Send to uinput device if enabled and not paused — strip the
+                // trailing newline and append a space so segments stay on one
+                // line until the "new line" command types Enter.
+                if (!g_print_paused.load() && !g_uinput_paused.load() && params.uinput_enabled && uinput_fd >= 0) {
                     std::string uinput_text = output;
                     if (!uinput_text.empty() && uinput_text.back() == '\n') {
                         uinput_text.pop_back();
