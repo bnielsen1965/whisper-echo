@@ -266,6 +266,12 @@ int uinput::setup() {
     registered.push_back(KEY_ENTER);
     registered.push_back(KEY_BACKSPACE);
     registered.push_back(KEY_TAB);
+    registered.push_back(KEY_UP);
+    registered.push_back(KEY_DOWN);
+    registered.push_back(KEY_LEFT);
+    registered.push_back(KEY_RIGHT);
+    registered.push_back(KEY_HOME);
+    registered.push_back(KEY_END);
 
     for (uint16_t key : registered) {
         if (ioctl(fd, UI_SET_KEYBIT, key) < 0) {
@@ -339,6 +345,72 @@ static void type_space(int fd) {
 void uinput::type_spaces(int fd, int count) {
     for (int i = 0; i < count; ++i) {
         type_space(fd);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Type arrow up
+// ---------------------------------------------------------------------------
+
+void uinput::type_arrow_up(int fd, int count) {
+    for (int i = 0; i < count; ++i) {
+        key_tap(fd, KEY_UP);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Type arrow down
+// ---------------------------------------------------------------------------
+
+void uinput::type_arrow_down(int fd, int count) {
+    for (int i = 0; i < count; ++i) {
+        key_tap(fd, KEY_DOWN);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Type arrow left
+// ---------------------------------------------------------------------------
+
+void uinput::type_arrow_left(int fd, int count) {
+    for (int i = 0; i < count; ++i) {
+        key_tap(fd, KEY_LEFT);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Type arrow right
+// ---------------------------------------------------------------------------
+
+void uinput::type_arrow_right(int fd, int count) {
+    for (int i = 0; i < count; ++i) {
+        key_tap(fd, KEY_RIGHT);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Type Home
+// ---------------------------------------------------------------------------
+
+void uinput::type_home(int fd, int count) {
+    for (int i = 0; i < count; ++i) {
+        key_tap(fd, KEY_HOME);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Type End
+// ---------------------------------------------------------------------------
+
+void uinput::type_end(int fd, int count) {
+    for (int i = 0; i < count; ++i) {
+        key_tap(fd, KEY_END);
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 

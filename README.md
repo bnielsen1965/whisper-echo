@@ -174,10 +174,16 @@ Voice commands let you control transcription behavior without touching the keybo
 | "echo stop input" | Stop uinput typing only (stdout continues) |
 | "echo start input" | Resume uinput typing |
 | "echo new line" | Insert a line break in the output |
-| "echo backspace \<N\>" | Type N backspaces via uinput |
-| "echo spaces \<N\>" | Type N spaces via uinput |
+| "echo backspace" / "echo backspace \<N\>" | Type 1 or N backspaces via uinput |
+| "echo spaces" / "echo spaces \<N\>" | Type 1 or N spaces via uinput |
+| "echo arrow up" / "echo up arrow" / "echo arrow up \<N\>" | Type 1 or N up arrows |
+| "echo arrow down" / "echo down arrow" / "echo arrow down \<N\>" | Type 1 or N down arrows |
+| "echo arrow left" / "echo left arrow" / "echo arrow left \<N\>" | Type 1 or N left arrows |
+| "echo arrow right" / "echo right arrow" / "echo arrow right \<N\>" | Type 1 or N right arrows |
+| "echo home" | Type Home key (once) |
+| "echo end" | Type End key (once) |
 
-> **Note:** "echo paws" is an alternate trigger for "echo pause" since Whisper often transcribes "pause" as "paws".
+> **Note:** "echo paws" is an alternate trigger for "echo pause" since Whisper often transcribes "pause" as "paws". For parameterized commands, omitting the number defaults to 1.
 
 ### Command Variants
 
@@ -185,9 +191,9 @@ The default `command.json` provides three trigger prefixes for most commands:
 
 | Prefix | Example |
 |--------|---------|
-| **echo** | "echo pause", "echo stop input" |
-| **omega** | "omega pause", "omega stop input" |
-| **mega** | "mega pause", "mega stop input" |
+| **echo** | "echo pause", "echo arrow up", "echo stop input" |
+| **omega** | "omega pause", "omega up arrow", "omega stop input" |
+| **mega** | "mega pause", "mega arrow up", "mega stop input" |
 
 ### Custom Commands
 
@@ -199,13 +205,21 @@ Provide a JSON configuration file with `-cm`:
     "resume_print": ["echo resume", "omega resume", "mega resume"],
     "stop_uinput": ["echo stop input", "omega stop input", "mega stop input"],
     "resume_uinput": ["echo start input", "omega start input", "mega start input"],
-    "new_line": ["echo new line", "omega new line", "mega new line"]
+    "new_line": ["echo new line", "omega new line", "mega new line"],
+    "arrow_up": ["echo arrow up #", "echo up arrow #", "echo arrow up", "echo up arrow"],
+    "arrow_down": ["echo arrow down #", "echo down arrow #", "echo arrow down", "echo down arrow"],
+    "arrow_left": ["echo arrow left #", "echo left arrow #", "echo arrow left", "echo left arrow"],
+    "arrow_right": ["echo arrow right #", "echo right arrow #", "echo arrow right", "echo right arrow"],
+    "home": ["echo home", "omega home", "mega home"],
+    "end": ["echo end", "omega end", "mega end"],
+    "backspace": ["echo backspace #", "echo backspace"],
+    "space": ["echo space #", "echo space"]
 }
 ```
 
 Match is case-insensitive. A segment is treated as a command if it exactly matches a trigger phrase or is very close (at most 4 extra characters allowed to reduce false positives).
 
-Parameterized triggers use `#` as a placeholder for a number (e.g. "echo backspace #" matches "echo backspace three").
+Parameterized triggers use `#` as a placeholder for a number (e.g. "echo backspace #" matches "echo backspace three"). Number words (one through twenty, thirty, forty, fifty) and digits are both accepted. When no number is given, the default is 1.
 
 ### Command Actions
 
@@ -216,8 +230,14 @@ Parameterized triggers use `#` as a placeholder for a number (e.g. "echo backspa
 | `STOP_UINPUT` | Stops uinput typing only. Stdout printing continues. |
 | `RESUME_UINPUT` | Resumes uinput typing. |
 | `NEW_LINE` | Inserts a line break in stdout, output file, and uinput. |
-| `BACKSPACE` | Types backspace N times via uinput. |
-| `SPACE` | Types space N times via uinput. |
+| `BACKSPACE` | Types backspace N times via uinput (default 1). |
+| `SPACE` | Types space N times via uinput (default 1). |
+| `ARROW_UP` | Types up arrow N times via uinput (default 1). |
+| `ARROW_DOWN` | Types down arrow N times via uinput (default 1). |
+| `ARROW_LEFT` | Types left arrow N times via uinput (default 1). |
+| `ARROW_RIGHT` | Types right arrow N times via uinput (default 1). |
+| `HOME` | Types Home key via uinput (once, no parameter). |
+| `END` | Types End key via uinput (once, no parameter). |
 
 ### Pause State Independence
 

@@ -24,5 +24,67 @@
         "echo new line",
         "omega new line",
         "mega new line"
+    ],
+    "arrow_up": [
+        "echo arrow up #",
+        "echo up arrow #",
+        "echo arrow up",
+        "echo up arrow",
+        "omega arrow up #",
+        "omega up arrow #",
+        "mega arrow up #",
+        "mega up arrow #"
+    ],
+    "arrow_down": [
+        "echo arrow down #",
+        "echo down arrow #",
+        "echo arrow down",
+        "echo down arrow",
+        "omega arrow down #",
+        "omega down arrow #",
+        "mega arrow down #",
+        "mega down arrow #"
+    ],
+    "arrow_left": [
+        "echo arrow left #",
+        "echo left arrow #",
+        "echo arrow left",
+        "echo left arrow",
+        "omega arrow left #",
+        "omega left arrow #",
+        "mega arrow left #",
+        "mega left arrow #"
+    ],
+    "arrow_right": [
+        "echo arrow right #",
+        "echo right arrow #",
+        "echo arrow right",
+        "echo right arrow",
+        "omega arrow right #",
+        "omega right arrow #",
+        "mega arrow right #",
+        "mega right arrow #"
+    ],
+    "home": [
+        "echo home",
+        "omega home",
+        "mega home"
+    ],
+    "end": [
+        "echo end",
+        "omega end",
+        "mega end"
+    ],
+    "backspace": [
+        "echo backspace #",
+        "echo backspace",
+        "omega backspace #",
+        "mega backspace #"
+    ],
+    "space": [
+        "echo space #",
+        "echo space",
+        "omega space #",
+        "mega space #"
     ]
 }

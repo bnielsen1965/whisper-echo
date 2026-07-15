@@ -34,10 +34,28 @@ CommandRegistry::CommandRegistry() {
           { "echo new line" } },
 
         { CommandAction::BACKSPACE, "Backspace N",
-          { "echo backspace #" } },
+          { "echo backspace #", "echo backspace" } },
 
         { CommandAction::SPACE, "Spaces N",
-          { "echo spaces #" } },
+          { "echo spaces #", "echo spaces" } },
+
+        { CommandAction::ARROW_UP, "Arrow Up",
+          { "echo arrow up #", "echo up arrow #", "echo arrow up", "echo up arrow" } },
+
+        { CommandAction::ARROW_DOWN, "Arrow Down",
+          { "echo arrow down #", "echo down arrow #", "echo arrow down", "echo down arrow" } },
+
+        { CommandAction::ARROW_LEFT, "Arrow Left",
+          { "echo arrow left #", "echo left arrow #", "echo arrow left", "echo left arrow" } },
+
+        { CommandAction::ARROW_RIGHT, "Arrow Right",
+          { "echo arrow right #", "echo right arrow #", "echo arrow right", "echo right arrow" } },
+
+        { CommandAction::HOME, "Home",
+          { "echo home" } },
+
+        { CommandAction::END, "End",
+          { "echo end" } },
     };
 }
 
@@ -111,6 +129,12 @@ bool CommandRegistry::load_from_file(const std::string & path) {
             if (s == "new_line") return { CommandAction::NEW_LINE, "New Line" };
             if (s == "backspace") return { CommandAction::BACKSPACE, "Backspace N" };
             if (s == "space") return { CommandAction::SPACE, "Spaces N" };
+            if (s == "arrow_up") return { CommandAction::ARROW_UP, "Arrow Up" };
+            if (s == "arrow_down") return { CommandAction::ARROW_DOWN, "Arrow Down" };
+            if (s == "arrow_left") return { CommandAction::ARROW_LEFT, "Arrow Left" };
+            if (s == "arrow_right") return { CommandAction::ARROW_RIGHT, "Arrow Right" };
+            if (s == "home") return { CommandAction::HOME, "Home" };
+            if (s == "end") return { CommandAction::END, "End" };
             return { CommandAction::PAUSE_PRINT, "" }; // unknown
         };
 
@@ -151,6 +175,12 @@ bool CommandRegistry::load_from_file(const std::string & path) {
             CommandAction::NEW_LINE,
             CommandAction::BACKSPACE,
             CommandAction::SPACE,
+            CommandAction::ARROW_UP,
+            CommandAction::ARROW_DOWN,
+            CommandAction::ARROW_LEFT,
+            CommandAction::ARROW_RIGHT,
+            CommandAction::HOME,
+            CommandAction::END,
         };
         for (const auto& default_cmd : defaults.commands_) {
             bool found = false;

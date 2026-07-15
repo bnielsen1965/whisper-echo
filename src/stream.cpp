@@ -378,19 +378,49 @@ int main(int argc, char ** argv) {
                             }
                             break;
                         case CommandAction::BACKSPACE:
-                            if (!result.params.empty()) {
-                                int count = result.params[0];
-                                if (params.uinput_enabled && uinput_fd >= 0) {
-                                    uinput::type_backspaces(uinput_fd, count);
-                                }
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                int count = result.params.empty() ? 1 : result.params[0];
+                                uinput::type_backspaces(uinput_fd, count);
                             }
                             break;
                         case CommandAction::SPACE:
-                            if (!result.params.empty()) {
-                                int count = result.params[0];
-                                if (params.uinput_enabled && uinput_fd >= 0) {
-                                    uinput::type_spaces(uinput_fd, count);
-                                }
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                int count = result.params.empty() ? 1 : result.params[0];
+                                uinput::type_spaces(uinput_fd, count);
+                            }
+                            break;
+                        case CommandAction::ARROW_UP:
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                int up_count = result.params.empty() ? 1 : result.params[0];
+                                uinput::type_arrow_up(uinput_fd, up_count);
+                            }
+                            break;
+                        case CommandAction::ARROW_DOWN:
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                int down_count = result.params.empty() ? 1 : result.params[0];
+                                uinput::type_arrow_down(uinput_fd, down_count);
+                            }
+                            break;
+                        case CommandAction::ARROW_LEFT:
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                int left_count = result.params.empty() ? 1 : result.params[0];
+                                uinput::type_arrow_left(uinput_fd, left_count);
+                            }
+                            break;
+                        case CommandAction::ARROW_RIGHT:
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                int right_count = result.params.empty() ? 1 : result.params[0];
+                                uinput::type_arrow_right(uinput_fd, right_count);
+                            }
+                            break;
+                        case CommandAction::HOME:
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                uinput::type_home(uinput_fd);
+                            }
+                            break;
+                        case CommandAction::END:
+                            if (params.uinput_enabled && uinput_fd >= 0) {
+                                uinput::type_end(uinput_fd);
                             }
                             break;
                     }

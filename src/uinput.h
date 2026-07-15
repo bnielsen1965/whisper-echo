@@ -30,4 +30,22 @@ void type_backspaces(int fd, int count);
 /// Type the space key N times.
 void type_spaces(int fd, int count);
 
+/// Type the arrow up key N times.
+void type_arrow_up(int fd, int count = 1);
+
+/// Type the arrow down key N times.
+void type_arrow_down(int fd, int count = 1);
+
+/// Type the arrow left key N times.
+void type_arrow_left(int fd, int count = 1);
+
+/// Type the arrow right key N times.
+void type_arrow_right(int fd, int count = 1);
+
+/// Type the Home key N times.
+void type_home(int fd, int count = 1);
+
+/// Type the End key N times.
+void type_end(int fd, int count = 1);
+
 } // namespace uinput

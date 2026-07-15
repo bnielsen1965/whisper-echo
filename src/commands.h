@@ -17,6 +17,12 @@ enum class CommandAction {
     NEW_LINE,         // Print a blank line to stdout/output file
     BACKSPACE,        // Type backspace N times (N from captured # parameter)
     SPACE,            // Type space N times (N from captured # parameter)
+    ARROW_UP,         // Type arrow up key N times (N from captured # parameter, default 1)
+    ARROW_DOWN,       // Type arrow down key N times (N from captured # parameter, default 1)
+    ARROW_LEFT,       // Type arrow left key N times (N from captured # parameter, default 1)
+    ARROW_RIGHT,      // Type arrow right key N times (N from captured # parameter, default 1)
+    HOME,             // Type Home key N times (N from captured # parameter, default 1)
+    END,              // Type End key N times (N from captured # parameter, default 1)
 };
 
 /// A single voice command with human-readable name and trigger phrases.
