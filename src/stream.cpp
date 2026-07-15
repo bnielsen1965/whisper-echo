@@ -9,8 +9,11 @@
 #include "whisper.h"
 
 #include <chrono>
+#include <condition_variable>
 #include <cstdio>
 #include <fstream>
+#include <future>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -243,6 +246,15 @@ int main(int argc, char ** argv) {
     int n_iter = 0;
     bool is_running = true;
 
+    // Pending async transcription — allows VAD to keep feeding while
+    // whisper_full() runs in the background so we don't miss the start
+    // of the next utterance.
+    struct PendingTranscription {
+        int duration_ms = 0;              // how much to advance the buffer
+        std::future<bool> future;         // transcription result
+    };
+    PendingTranscription pending;
+
     std::ofstream fout;
     if (params.fname_out.length() > 0) {
         fout.open(params.fname_out);
@@ -301,8 +313,10 @@ int main(int argc, char ** argv) {
 
     const auto t_start = std::chrono::high_resolution_clock::now();
 
-    // Helper to run transcription and print results (shared by both VAD modes)
-    auto transcribe_and_print = [&]() {
+    // Helper to run transcription and print results (shared by both VAD modes).
+    // Takes audio data by value so it can be called from a background thread
+    // while the main loop keeps feeding VAD.
+    auto transcribe_and_print = [&](std::vector<float> audio_data) {
         print_status(Status::PROCESSING);
 
         whisper_full_params wparams = whisper_full_default_params(
@@ -322,7 +336,7 @@ int main(int argc, char ** argv) {
         wparams.tdrz_enable      = params.tinydiarize;
         wparams.temperature_inc  = params.no_fallback ? 0.0f : wparams.temperature_inc;
 
-        if (whisper_full(ctx, wparams, pcmf32.data(), pcmf32.size()) != 0) {
+        if (whisper_full(ctx, wparams, audio_data.data(), audio_data.size()) != 0) {
             fprintf(stderr, "%s: failed to process audio\n", argv[0]);
             return false;
         }
@@ -339,7 +353,7 @@ int main(int argc, char ** argv) {
 
             if (params.print_details) {
                 const int64_t t1 = (std::chrono::high_resolution_clock::now() - t_start).count() / 1000000;
-                const int64_t t0 = std::max(int64_t(0), t1 - (int64_t)(pcmf32.size() * 1000.0 / WHISPER_SAMPLE_RATE));
+                const int64_t t0 = std::max(int64_t(0), t1 - (int64_t)(audio_data.size() * 1000.0 / WHISPER_SAMPLE_RATE));
 
                 ensure_off_status_line();
                 printf("### Transcription %d | t0 = %d ms | t1 = %d ms\n", n_iter, (int)t0, (int)t1);
@@ -490,10 +504,9 @@ int main(int argc, char ** argv) {
 
         // Save audio before advancing buffer
         if (params.save_audio) {
-            wavWriter.write(pcmf32.data(), pcmf32.size());
+            wavWriter.write(audio_data.data(), audio_data.size());
         }
 
-        pcmf32.clear();
         ++n_iter;
         fflush(stdout);
 
@@ -510,6 +523,24 @@ int main(int argc, char ** argv) {
         is_running = sdl_poll_events();
         if (!is_running) {
             break;
+        }
+
+        // If a previous transcription just finished (or is ready), reap it
+        // before doing more work so we don't hold on to audio data longer
+        // than necessary.
+        if (pending.future.valid()) {
+            if (pending.future.wait_for(std::chrono::milliseconds(0)) ==
+                std::future_status::ready) {
+                bool ok = pending.future.get();
+                if (!ok) {
+                    break;
+                }
+
+                // Advance the circular buffer past the transcribed audio
+                audio.advance(pending.duration_ms);
+            }
+            // If not ready yet — fall through and keep feeding VAD; the
+            // transcription thread will reap itself on the next iteration.
         }
 
         if (use_silero) {
@@ -533,14 +564,13 @@ int main(int argc, char ** argv) {
                     break;
 
                 case stream_vad_state::Result::END: {
-                    print_status(Status::PROCESSING);
-
-                    // Extract the speech segment from the circular buffer.
-                    // Add a pre-speech buffer to capture audio spoken before the
-                    // VAD detected speech — VAD has ~50-100ms of latency.
+                    // Extract the speech segment from the circular buffer
+                    // immediately so it's preserved while VAD keeps running.
+                    // Add a pre-speech buffer to capture audio spoken before
+                    // the VAD detected speech — VAD has ~50-100ms of latency.
                     {
                         const int pre_buffer_ms = 200;
-                        int speech_duration_ms = vad_state.speech_ms + vad_state.min_silence_ms + pre_buffer_ms;
+                        int speech_duration_ms = vad_state.captured_ms + pre_buffer_ms;
                         if (speech_duration_ms > params.length_ms) {
                             speech_duration_ms = params.length_ms;
                         }
@@ -548,11 +578,27 @@ int main(int argc, char ** argv) {
                             speech_duration_ms = 100;
                         }
 
+                        // If a previous transcription is still running, wait
+                        // for it first so whisper_full isn't called concurrently.
+                        if (pending.future.valid()) {
+                            bool ok = pending.future.get();
+                            if (!ok) return 6;
+                            audio.advance(pending.duration_ms);
+                        }
+
                         audio.get(speech_duration_ms, pcmf32);
 
-                        if (!pcmf32.empty() && transcribe_and_print()) {
-                            // Advance buffer past the transcribed audio
-                            audio.advance(speech_duration_ms);
+                        if (!pcmf32.empty()) {
+                            // Store the duration for buffer advancement after
+                            // transcription completes, then launch async.
+                            pending.duration_ms = speech_duration_ms;
+                            std::vector<float> audio_data = std::move(pcmf32);
+                            pending.future =
+                                std::async(std::launch::async,
+                                           [&transcribe_and_print,
+                                            audio_data = std::move(audio_data)]() mutable {
+                                    return transcribe_and_print(std::move(audio_data));
+                                });
                         }
                     }
 
@@ -582,7 +628,7 @@ int main(int argc, char ** argv) {
             if (::vad_simple(pcmf32, WHISPER_SAMPLE_RATE, 1000,
                              params.vad_thold, params.freq_thold, false)) {
                 // Speech followed by silence — transcribe
-                if (!transcribe_and_print()) {
+                if (!transcribe_and_print(std::move(pcmf32))) {
                     return 6;
                 }
 
@@ -593,6 +639,12 @@ int main(int argc, char ** argv) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
             }
         }
+    }
+
+    // Wait for any in-flight transcription before tearing down
+    if (pending.future.valid()) {
+        pending.future.get();
+        audio.advance(pending.duration_ms);
     }
 
     // Cleanup

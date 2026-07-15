@@ -164,6 +164,9 @@ stream_vad_state::Result stream_vad_state::feed_chunk(const float * samples, int
             // Transition: SILENCE -> SPEECH
             in_speech = true;
             speech_ms = chunk_ms;
+            captured_ms = chunk_ms;
+        } else {
+            captured_ms += chunk_ms;
         }
         return Result::SPEECH;
     }
@@ -177,6 +180,7 @@ stream_vad_state::Result stream_vad_state::feed_chunk(const float * samples, int
 
     // Was in speech, now silence — accumulate to confirm end
     silence_ms += chunk_ms;
+    captured_ms += chunk_ms;  // include intra-utterance silence in total span
     if (silence_ms >= min_silence_ms && speech_ms >= min_speech_ms) {
         // Confirmed end of speech
         in_speech = false;
@@ -190,6 +194,7 @@ void stream_vad_reset(stream_vad_state & state) {
     state.in_speech = false;
     state.silence_ms = 0;
     state.speech_ms = 0;
+    state.captured_ms = 0;
     if (state.vctx != nullptr) {
         whisper_vad_reset_state(state.vctx);
     }
