@@ -12,16 +12,20 @@
     ],
     "stop_uinput": [
         "echo stop input",
+        "echo input stop",
         "omega stop input",
         "mega stop input"
     ],
     "resume_uinput": [
         "echo start input",
+        "echo input start",
         "omega start input",
         "mega start input"
     ],
     "new_line": [
         "echo new line",
+        "echo a new line",
+        "echo end of line",
         "omega new line",
         "mega new line"
     ],

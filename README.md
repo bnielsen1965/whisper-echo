@@ -4,6 +4,19 @@ Real-time streaming speech-to-text application. Captures live audio from a micro
 
 Supports GPU-accelerated inference, voice commands for controlling transcription output, uinput typing with independent pause controls, and two VAD modes — neural (Silero) and energy-based fallback.
 
+
+## AI Transparency
+
+This application was developed using AI.
+
+Claude code and opencode were used with a local AI setup using an AMD Radeon AI Pro R9700 32GB GPU card.
+The GPU card is mounted in a DEG1 dock with an oculink connection.
+A custom build of llama.cpp was used to host the LLM for claude code use.
+A quantized version of Qwen3.6 27B dense model with MTP was used for the initial development.
+In follow up development a quantized Muse Glitter 30B model was used.
+Once whisper-echo reached a functional point it was used to generate claude code prompts from speech.
+
+
 ## Quick Start
 
 ```bash
@@ -16,10 +29,10 @@ cmake --build . --config Release
 ./whisper-echo
 
 # Run with a specific model
-./whisper-echo -m models/ggml-medium.en.bin
+./whisper-echo -m ~/.models/ggml-medium.en.bin
 
 # Use Silero VAD (neural speech detection)
-./whisper-echo -vm models/ggml-silero-v6.2.0.bin
+./whisper-echo -vm ~/.models/ggml-silero-v6.2.0.bin
 
 # Write transcription to a file
 ./whisper-echo -f output.txt
@@ -52,7 +65,7 @@ The uinput feature (`--uinput`) is Linux-only and requires:
 
 ## Models
 
-Place model files in the `models/` directory. The project ships with the following (git-ignored `.bin` files):
+Place model files in `~/.models/`. The project ships with the following (git-ignored `.bin` files):
 
 | Model | File | Size | Description |
 |-------|------|------|-------------|
@@ -111,14 +124,14 @@ cmake -DGGML_VULKAN=OFF -DGGML_CUDA=OFF -DGGML_METAL=OFF -DGGML_HIP=ON ..
 | `-nf` | `--no-fallback` | false | Disable temperature fallback on low confidence |
 | `-ps` | `--print-special` | false | Print special tokens in output |
 | `-l` | `--language` | en | Spoken language (ISO 639-1 code, e.g. "en", "es", "fr") |
-| `-m` | `--model` | models/ggml-base.en.bin | Path to Whisper model file |
+| `-m` | `--model` | ~/.models/ggml-base.en.bin | Path to Whisper model file |
 | `-f` | `--file` | — | Save transcription to a text file |
 | `-tdrz` | `--tinydiarize` | false | Enable speaker diarization |
 | `-sa` | `--save-audio` | false | Save recorded audio segments as WAV files |
 | `-ng` | `--no-gpu` | false | Disable GPU inference (CPU only) |
 | `-gd` | `--gpu-device` | 0 | GPU device ID |
 | `-nfa` | `--no-flash-attn` | false | Disable flash attention |
-| `-vm` | `--vad-model` | models/for-tests-silero-v6.2.0-ggml.bin | Path to Silero VAD model file |
+| `-vm` | `--vad-model` | ~/.models/ggml-silero-v6.2.0.bin | Path to Silero VAD model file |
 | `-nsv` | `--no-silero-vad` | false | Disable Silero VAD (use energy-based fallback) |
 | `-d` | `--detail` | false | Print transcription timestamps and headers |
 | `-ns` | `--no-status` | false | Hide the status indicator |
@@ -132,19 +145,19 @@ cmake -DGGML_VULKAN=OFF -DGGML_CUDA=OFF -DGGML_METAL=OFF -DGGML_HIP=ON ..
 ./whisper-echo
 
 # Spanish transcription with medium model
-./whisper-echo -l es -m models/ggml-medium.en.bin
+./whisper-echo -l es -m ~/.models/ggml-medium.en.bin
 
 # Neural VAD for better speech detection
-./whisper-echo -vm models/ggml-silero-v6.2.0.bin
+./whisper-echo -vm ~/.models/ggml-silero-v6.2.0.bin
 
 # CPU only, detailed output, save to file
 ./whisper-echo -ng -d -f transcript.txt
 
 # Translate spoken French to English
-./whisper-echo -l fr -tr -m models/ggml-medium.en.bin
+./whisper-echo -l fr -tr -m ~/.models/ggml-medium.en.bin
 
 # Type directly into applications with uinput
-./whisper-echo --uinput -vm models/ggml-silero-v6.2.0.bin
+./whisper-echo --uinput -vm ~/.models/ggml-silero-v6.2.0.bin
 
 # Custom capture device, custom commands
 ./whisper-echo -c 2 -cm command.json
@@ -157,7 +170,7 @@ cmake -DGGML_VULKAN=OFF -DGGML_CUDA=OFF -DGGML_METAL=OFF -DGGML_HIP=ON ..
 
 whisper-echo supports two VAD modes:
 
-1. **Silero VAD (neural)** — A deep-learning-based speech detector that accurately distinguishes speech from noise. Load it with `-vm models/ggml-silero-v6.2.0.bin`. This is the recommended mode for reliable operation.
+1. **Silero VAD (neural)** — A deep-learning-based speech detector that accurately distinguishes speech from noise. Load it with `-vm ~/.models/ggml-silero-v6.2.0.bin`. This is the recommended mode for reliable operation.
 
 2. **Energy-based (fallback)** — A simple high-pass filter and energy comparison. Used automatically if Silero VAD is not available or is disabled with `-nsv`. Tunable via `--vad-thold`, `--freq-thold`, and `--vad-gain`.
 
@@ -175,7 +188,7 @@ Voice commands let you control transcription behavior without touching the keybo
 | "echo start input" | Resume uinput typing |
 | "echo new line" | Insert a line break in the output |
 | "echo backspace" / "echo backspace \<N\>" | Type 1 or N backspaces via uinput |
-| "echo spaces" / "echo spaces \<N\>" | Type 1 or N spaces via uinput |
+| "echo space" / "echo space \<N\>" | Type 1 or N spaces via uinput |
 | "echo arrow up" / "echo up arrow" / "echo arrow up \<N\>" | Type 1 or N up arrows |
 | "echo arrow down" / "echo down arrow" / "echo arrow down \<N\>" | Type 1 or N down arrows |
 | "echo arrow left" / "echo left arrow" / "echo arrow left \<N\>" | Type 1 or N left arrows |
@@ -203,17 +216,17 @@ Provide a JSON configuration file with `-cm`:
 {
     "pause_print": ["echo pause", "omega pause", "mega pause", "echo paws"],
     "resume_print": ["echo resume", "omega resume", "mega resume"],
-    "stop_uinput": ["echo stop input", "omega stop input", "mega stop input"],
-    "resume_uinput": ["echo start input", "omega start input", "mega start input"],
-    "new_line": ["echo new line", "omega new line", "mega new line"],
-    "arrow_up": ["echo arrow up #", "echo up arrow #", "echo arrow up", "echo up arrow"],
-    "arrow_down": ["echo arrow down #", "echo down arrow #", "echo arrow down", "echo down arrow"],
-    "arrow_left": ["echo arrow left #", "echo left arrow #", "echo arrow left", "echo left arrow"],
-    "arrow_right": ["echo arrow right #", "echo right arrow #", "echo arrow right", "echo right arrow"],
+    "stop_uinput": ["echo stop input", "echo input stop", "omega stop input", "mega stop input"],
+    "resume_uinput": ["echo start input", "echo input start", "omega start input", "mega start input"],
+    "new_line": ["echo new line", "echo a new line", "echo end of line", "omega new line", "mega new line"],
+    "arrow_up": ["echo arrow up #", "echo up arrow #", "echo arrow up", "echo up arrow", "omega arrow up #", "omega up arrow #", "mega arrow up #", "mega up arrow #"],
+    "arrow_down": ["echo arrow down #", "echo down arrow #", "echo arrow down", "echo down arrow", "omega arrow down #", "omega down arrow #", "mega arrow down #", "mega down arrow #"],
+    "arrow_left": ["echo arrow left #", "echo left arrow #", "echo arrow left", "echo left arrow", "omega arrow left #", "omega left arrow #", "mega arrow left #", "mega left arrow #"],
+    "arrow_right": ["echo arrow right #", "echo right arrow #", "echo arrow right", "echo right arrow", "omega arrow right #", "omega right arrow #", "mega arrow right #", "mega right arrow #"],
     "home": ["echo home", "omega home", "mega home"],
     "end": ["echo end", "omega end", "mega end"],
-    "backspace": ["echo backspace #", "echo backspace"],
-    "space": ["echo space #", "echo space"]
+    "backspace": ["echo backspace #", "echo backspace", "omega backspace #", "mega backspace #"],
+    "space": ["echo space #", "echo space", "omega space #", "mega space #"]
 }
 ```
 
@@ -313,7 +326,7 @@ Microphone → SDL2 → Circular Buffer → VAD → Whisper → Segment Text
 ├── CMakeLists.txt              # Build configuration
 ├── command.json                # Voice command configuration
 ├── setup_uinput.sh             # Script to configure /dev/uinput permissions
-├── models/                     # Pre-trained model files (.bin)
+├── models/                     # Pre-trained model files (.bin) – default runtime path ~/.models/
 ├── src/
 │   ├── stream.cpp              # Main entry point, CLI, transcription loop
 │   ├── audio_capture.h         # SDL-based audio capture declarations

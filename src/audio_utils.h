@@ -142,7 +142,8 @@ struct stream_vad_state {
     int min_speech_ms = 150;     // minimum valid speech duration (filters noise)
     int captured_ms = 0;         // total elapsed time since speech started (includes intra-utterance silence)
     int sample_rate = 16000;
-    float vad_threshold = 0.5f;  // probability threshold for speech
+    float vad_threshold = 0.5f;  // probability threshold for speech (start)
+    float vad_neg_threshold;     // lower threshold to confirm silence (hysteresis); set to vad_threshold - 0.15 by init
     float vad_gain = 1.0f;       // multiplier applied to audio before VAD inference
     bool initialized = false;
 

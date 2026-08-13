@@ -52,10 +52,10 @@ struct whisper_params {
     bool uinput_enabled = false; // type transcribed text via uinput virtual keyboard
 
     std::string language = "en";
-    std::string model    = "models/ggml-base.en.bin";
+    std::string model    = "~/.models/ggml-base.en.bin";
     std::string fname_out;
 
-    std::string vad_model = "models/for-tests-silero-v6.2.0-ggml.bin";
+    std::string vad_model = "~/.models/ggml-silero-v6.2.0.bin";
     bool use_silero_vad   = true;
     bool print_details    = false; // print transcription headers and timestamps
     bool print_status     = true;  // show status indicator (idle, listening, ...)
@@ -191,7 +191,14 @@ int main(int argc, char ** argv) {
     cparams.use_gpu    = params.use_gpu;
     cparams.flash_attn = params.flash_attn;
 
-    struct whisper_context * ctx = whisper_init_from_file_with_params(params.model.c_str(), cparams);
+    std::string model_path = params.model;
+    if (!model_path.empty() && model_path[0] == '~') {
+        const char * home = getenv("HOME");
+        if (home) {
+            model_path = std::string(home) + model_path.substr(1);
+        }
+    }
+    struct whisper_context * ctx = whisper_init_from_file_with_params(model_path.c_str(), cparams);
     if (ctx == nullptr) {
         fprintf(stderr, "error: failed to initialize whisper context\n");
         return 2;

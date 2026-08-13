@@ -86,11 +86,18 @@ bool stream_vad_init(stream_vad_state & state,
                      int n_threads,
                      bool use_gpu,
                      int gpu_device) {
+    std::string expanded_path = model_path;
+    if (!expanded_path.empty() && expanded_path[0] == '~') {
+        const char * home = getenv("HOME");
+        if (home) {
+            expanded_path = std::string(home) + expanded_path.substr(1);
+        }
+    }
     // Check if model file exists
-    std::ifstream f(model_path);
+    std::ifstream f(expanded_path);
     if (!f.good()) {
         fprintf(stderr, "%s: VAD model '%s' not found, falling back to vad_simple\n",
-                __func__, model_path.c_str());
+                __func__, expanded_path.c_str());
         state.initialized = false;
         return false;
     }
@@ -106,10 +113,10 @@ bool stream_vad_init(stream_vad_state & state,
     ctx_params.use_gpu    = false;
     ctx_params.gpu_device = 0;
 
-    state.vctx = whisper_vad_init_from_file_with_params(model_path.c_str(), ctx_params);
+    state.vctx = whisper_vad_init_from_file_with_params(expanded_path.c_str(), ctx_params);
     if (state.vctx == nullptr) {
         fprintf(stderr, "%s: failed to load VAD model '%s', falling back to vad_simple\n",
-                __func__, model_path.c_str());
+                __func__, expanded_path.c_str());
         state.initialized = false;
         return false;
     }
@@ -118,9 +125,14 @@ bool stream_vad_init(stream_vad_state & state,
     state.in_speech = false;
     state.silence_ms = 0;
     state.speech_ms = 0;
+    // Hysteresis: once in speech, require a lower probability to confirm
+    // silence.  Matches whisper.cpp batch VAD's neg_threshold behaviour
+    // (threshold - 0.15) so borderline noise doesn't endlessly reset the
+    // silence counter and keep the capture open.
+    state.vad_neg_threshold = state.vad_threshold - 0.15f;
 
     fprintf(stderr, "%s: Silero VAD initialized (model: %s)\n",
-            __func__, model_path.c_str());
+            __func__, expanded_path.c_str());
     return true;
 }
 
@@ -154,7 +166,14 @@ stream_vad_state::Result stream_vad_state::feed_chunk(const float * samples, int
     // Read the speech probability from the last chunk
     int     n_probs = whisper_vad_n_probs(vctx);
     float * probs   = whisper_vad_probs(vctx);
-    bool    is_speech = (n_probs > 0 && probs[n_probs - 1] >= vad_threshold);
+    float   prob = (n_probs > 0) ? probs[n_probs - 1] : 0.0f;
+
+    // Three-way classification with hysteresis:
+    //   prob >= vad_threshold      -> clearly speech
+    //   prob < vad_neg_threshold   -> clearly silence
+    //   in between                 -> borderline (don't reset silence counter)
+    bool is_speech  = (prob >= vad_threshold);
+    bool is_silence = (prob < vad_neg_threshold);
 
     if (is_speech) {
         silence_ms = 0;
@@ -171,16 +190,22 @@ stream_vad_state::Result stream_vad_state::feed_chunk(const float * samples, int
         return Result::SPEECH;
     }
 
-    // This chunk is classified as silence/noise
+    // Not clearly speech
     if (!in_speech) {
         // Still in silence, nothing interesting
         speech_ms = 0;
         return Result::SILENCE;
     }
 
-    // Was in speech, now silence — accumulate to confirm end
-    silence_ms += chunk_ms;
-    captured_ms += chunk_ms;  // include intra-utterance silence in total span
+    // Was in speech — accumulate silence to confirm end.
+    // Borderline chunks (between neg_threshold and threshold) do not reset
+    // the silence counter; they're simply ignored so that brief noise
+    // bursts don't prevent the VAD from recognizing that speech has ended.
+    if (is_silence) {
+        silence_ms += chunk_ms;
+    }
+    // include intra-utterance silence in total span even for borderline
+    captured_ms += chunk_ms;
     if (silence_ms >= min_silence_ms && speech_ms >= min_speech_ms) {
         // Confirmed end of speech
         in_speech = false;
