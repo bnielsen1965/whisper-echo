@@ -4,6 +4,22 @@ Real-time streaming speech-to-text application. Captures live audio from a micro
 
 Supports GPU-accelerated inference, voice commands for controlling transcription output, uinput typing with independent pause controls, and two VAD modes — neural (Silero) and energy-based fallback.
 
+## Table of Contents
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Models](#models)
+- [Building](#building)
+- [Usage](#usage)
+- [Voice Activity Detection](#voice-activity-detection)
+- [Voice Commands](#voice-commands)
+- [Uinput Virtual Keyboard](#uinput-virtual-keyboard)
+- [Status Indicator](#status-indicator)
+- [Audio Output](#audio-output)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Troubleshooting](#troubleshooting)
+- [Dependencies](#dependencies)
+- [Packaging and Development](#packaging-and-development)
 
 ## AI Transparency
 
