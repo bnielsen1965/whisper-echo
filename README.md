@@ -430,10 +430,13 @@ cmake --build build
 cd build && cpack -G RPM
 ```
 
-The build produces `whisper-echo` and `whisper-echo-devel` packages in the `build/` directory. Run `rpmlint` to check policy:
+CPack produces a single monolithic `whisper-echo` RPM in `build/` containing binaries, libraries, headers, pkg-config and CMake files. Run `rpmlint` to check policy:
 ```bash
 rpmlint build/whisper-echo-*.rpm
 ```
+Note: CPack does not split -devel; rpmlint will warn about devel files in the main package. Use the rpmbuild spec below for a proper binary/devel split.
+
+The spec is at `packaging/rpm/whisper-echo.spec`. For SRPM builds, create a source tarball with submodules:
 
 The spec is at `packaging/rpm/whisper-echo.spec`. For SRPM builds, create a source tarball with submodules:
 ```bash
