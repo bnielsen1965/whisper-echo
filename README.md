@@ -20,6 +20,13 @@ Once whisper-echo reached a functional point it was used to generate claude code
 ## Quick Start
 
 ```bash
+# Clone with submodules
+git clone --recursive https://github.com/bnielsen1965/whisper-echo.git
+cd whisper-echo
+
+# If you already cloned without --recursive:
+git submodule update --init --recursive
+
 # Build
 mkdir build && cd build
 cmake ..
