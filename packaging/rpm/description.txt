@@ -1,0 +1,1 @@
+Real-time streaming speech-to-text with Whisper and VAD.

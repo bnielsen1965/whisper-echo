@@ -1,0 +1,17 @@
+Source: whisper-echo
+Section: multimedia
+Priority: optional
+Maintainer: Bryan Nielsen <bnielsen1965@gmail.com>
+Build-Depends: debhelper (>= 13), cmake (>= 3.16), build-essential, libsdl2-dev, libvulkan-dev, libgl-dev
+Standards-Version: 4.7.0
+Homepage: https://github.com/bnielsen1965/whisper-echo
+Vcs-Browser: https://github.com/bnielsen1965/whisper-echo
+Vcs-Git: https://github.com/bnielsen1965/whisper-echo.git
+
+Package: whisper-echo
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libsdl2-2.0-0 (>= 2.0.0)
+Description: Real-time streaming speech-to-text with Whisper and VAD
+ whisper-echo provides a real-time streaming speech-to-text pipeline using
+ OpenAI Whisper and voice activity detection. It includes a command-line
+ interface and uinput support for keyboard emulation.

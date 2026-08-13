@@ -1,0 +1,4 @@
+usr/bin/whisper-echo usr/bin/
+share/whisper-echo/* share/whisper-echo/
+share/man/man1/whisper-echo.1.gz share/man/man1/
+share/doc/whisper-echo/uinput.md share/doc/whisper-echo/

@@ -1,0 +1,56 @@
+.TH WHISPER-ECHO 1 "August 2026" "whisper-echo 0.1.0" "User Commands"
+.SH NAME
+whisper\-echo \- real\-time streaming speech\-to\-text with Whisper and VAD
+.SH SYNOPSIS
+.B whisper\-echo
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B whisper\-echo
+provides real\-time streaming speech\-to\-text using OpenAI Whisper and voice activity detection.
+It captures audio from the default or specified input device, transcribes speech as it occurs,
+and optionally types the transcription via uinput.
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Show help message and exit.
+.TP
+.BR \-L ", " \-\-list\-devices
+List audio capture devices and exit.
+.TP
+.BR \-t " N, " \-\-threads " N"
+Number of threads to use during computation.
+.TP
+.BR \-l " LANG, " \-\-language " LANG"
+Spoken language, e.g. en.
+.TP
+.BR \-m " FNAME, " \-\-model " FNAME"
+Model path, default ~/.models/ggml-base.en.bin.
+.TP
+.BR \-c " ID, " \-\-capture " ID"
+Capture device ID.
+.TP
+.BR \-ui ", " \-\-uinput
+Type transcribed text via uinput virtual keyboard. Requires manual uinput setup; see docs/uinput.md.
+.TP
+.BR \-cm " FNAME, " \-\-commands " FNAME"
+Voice command configuration file.
+.TP
+.BR \-ng ", " \-\-no\-gpu
+Disable GPU inference.
+.TP
+.BR \-nsv ", " \-\-no\-silero\-vad
+Disable Silero VAD, use energy\-based VAD.
+.SH FILES
+.TP
+.I /usr/share/whisper\-echo/command.json
+Default voice commands.
+.TP
+.I /usr/share/whisper\-echo/setup_uinput.sh
+Helper script for optional uinput setup. Review before use.
+.SH SECURITY
+Uinput access allows creation of virtual input devices and can inject keystrokes.
+The package does not install udev rules automatically. See docs/uinput.md for manual setup.
+.SH SEE ALSO
+whisper.cpp(7)
+.SH AUTHOR
+whisper\-echo contributors

@@ -360,3 +360,57 @@ Microphone → SDL2 → Circular Buffer → VAD → Whisper → Segment Text
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp) — C/C++ Whisper inference (vendored submodule)
 - [SDL2](https://www.libsdl.org/) — Audio capture
 - [nlohmann/json](https://github.com/nlohmann/json) — JSON parsing for commands (via whisper.cpp)
+
+## Packaging and Development
+
+### Building from source
+
+```bash
+git clone --recursive https://github.com/bnielsen1965/whisper-echo.git
+cd whisper-echo
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
+```
+
+CMake targets:
+* `cmake --build build --target dist` — create a source tarball with submodules
+* `cmake --build build --target update-changelog` — update debian/changelog from git tag
+
+### RPM packaging
+
+Binary RPM via CPack:
+```bash
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
+cmake --build build
+cpack -G RPM
+```
+
+The build produces `whisper-echo` and `whisper-echo-devel` packages. The spec is at `packaging/rpm/whisper-echo.spec`. For SRPM builds, create a source tarball with submodules:
+```bash
+./tools/make_dist.sh
+rpmbuild -ba packaging/rpm/whisper-echo.spec
+```
+
+Run `rpmlint` to check policy:
+```bash
+rpmlint whisper-echo-*.rpm
+```
+
+### Debian packaging
+
+```bash
+sudo apt install debhelper cmake build-essential libsdl2-dev libvulkan-dev
+dpkg-buildpackage -us -uc
+lintian ../whisper-echo_*.deb
+```
+
+The Debian tree is in `debian/`. Man page is installed as `whisper-echo.1.gz`, docs go to `/usr/share/doc/whisper-echo/`. Udev rules are not installed automatically; see `docs/uinput.md` and `share/whisper-echo/setup_uinput.sh` for manual uinput setup.
+
+### Versioning
+
+Version is derived from git tags via CMake:
+* `PROJECT_VERSION` = `git describe --tags --abbrev=0`
+* `PROJECT_RELEASE` = commits since tag from `git describe --tags --long`
+
+Both RPM and DEB release numbers are auto-filled from git. Update changelog with `cmake --build build --target update-changelog`.

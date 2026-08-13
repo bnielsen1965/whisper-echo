@@ -1,0 +1,19 @@
+whisper-echo (a7331e0-1) unstable; urgency=medium
+
+  * Automated changelog update for version a7331e0-1
+
+ -- Bryan Nielsen <bnielsen1965@gmail.com>  Wed, 12 Aug 2026 19:02:07 -0700
+
+whisper-echo (a7331e01b577d882b5319a36177941b3cb738f80-1) unstable; urgency=medium
+
+  * Automated changelog update for version a7331e01b577d882b5319a36177941b3cb738f80
+
+ -- Bryan Nielsen <bnielsen1965@gmail.com>  Wed, 12 Aug 2026 19:01:07 -0700
+
+whisper-echo (0.1.0-1) unstable; urgency=medium
+
+  * Initial release
+  * Package built with CMake + CPack
+  * Includes udev rule for uinput access
+
+ -- Bryan Nielsen <bnielsen1965@gmail.com>  Tue, 12 Aug 2026 18:30:00 +0000

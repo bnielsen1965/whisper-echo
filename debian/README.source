@@ -1,0 +1,30 @@
+whisper-echo Debian packaging notes
+===================================
+
+Build system
+------------
+The upstream project uses CMake. The Debian package is built with debhelper
+compat 13 and CMake via dh_auto_*.
+
+To build:
+  dpkg-buildpackage -us -uc
+
+The package does NOT install udev rules automatically. Uinput access is
+security sensitive and is left to the administrator. See docs/uinput.md and
+share/whisper-echo/setup_uinput.sh for manual setup instructions.
+
+Files
+-----
+* debian/whisper-echo.manpages – declares the man page
+* debian/whisper-echo.docs – declares documentation files
+* debian/whisper-echo.install – explicit install list for CMake-built files
+
+Versioning
+----------
+Version is taken from git tags via CMake. For Debian releases, use
+upstream_version-debian_revision, e.g. 0.1.0-1.
+
+Standards
+---------
+Complies with Debian Policy 4.7.0, no auto-installed udev rules, man page
+compressed, docs installed under /usr/share/doc.
