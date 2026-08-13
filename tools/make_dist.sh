@@ -24,7 +24,8 @@ tar --exclude='.git' --exclude='*.tar.gz' --exclude='build' --exclude='build/*' 
 mv "$TMP_OUT" "$REPO_ROOT/$OUT"
 
 # Copy to rpmbuild SOURCES if rpmbuild is configured
-if [ -d "$HOME/rpmbuild/SOURCES" ]; then
+if [ -d "$HOME/rpmbuild" ]; then
+  mkdir -p "$HOME/rpmbuild/SOURCES"
   cp "$REPO_ROOT/$OUT" "$HOME/rpmbuild/SOURCES/"
   echo "Copied $OUT to ~/rpmbuild/SOURCES/"
 fi
