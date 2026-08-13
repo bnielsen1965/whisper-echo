@@ -96,6 +96,7 @@ add_custom_target(update-changelog
   COMMENT "Updating debian/changelog from git tag"
 )
 
+set(CPACK_PROJECT_NAME "whisper-echo")
 set(CPACK_PACKAGE_NAME "whisper-echo")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_PACKAGE_VENDOR "whisper-echo")

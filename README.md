@@ -406,10 +406,10 @@ Binary RPM via CPack:
 ```bash
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr
 cmake --build build
-cpack -G RPM
+cd build && cpack -G RPM
 ```
 
-The build produces `whisper-echo` and `whisper-echo-devel` packages. The spec is at `packaging/rpm/whisper-echo.spec`. For SRPM builds, create a source tarball with submodules:
+The build produces `whisper-echo` and `whisper-echo-devel` packages in the `build/` directory. The spec is at `packaging/rpm/whisper-echo.spec`. For SRPM builds, create a source tarball with submodules:
 ```bash
 ./tools/make_dist.sh
 rpmbuild -ba packaging/rpm/whisper-echo.spec
@@ -417,7 +417,7 @@ rpmbuild -ba packaging/rpm/whisper-echo.spec
 
 Run `rpmlint` to check policy:
 ```bash
-rpmlint whisper-echo-*.rpm
+rpmlint build/whisper-echo-*.rpm
 ```
 
 ### Debian packaging
