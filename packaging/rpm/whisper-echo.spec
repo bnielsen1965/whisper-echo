@@ -5,7 +5,6 @@ Summary:        Real-time streaming speech-to-text with Whisper and VAD
 License:        MIT
 URL:            https://github.com/bnielsen1965/whisper-echo
 Source0:        %{name}-%{version}.tar.gz
-Source1:        whisper.cpp-%{version}.tar.gz
 BuildRequires:  cmake >= 3.16, gcc-c++, make, SDL2-devel, vulkan-devel
 Requires:       libSDL2-2.0.so.0
 BuildArch:      x86_64
@@ -26,24 +25,32 @@ cmake -S . -B build \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=%{_prefix} \
   -DCMAKE_INSTALL_LIBDIR=%{_lib}
-cmake --build build -j%{_smp_ncpus}
+cmake --build build %{?_smp_mflags}
 
 %install
 rm -rf %{buildroot}
 cmake --install build --prefix %{buildroot}%{_prefix}
 
 %files
-%license vendor/whisper.cpp/LICENSE
-%doc docs/uinput.md
 %{_bindir}/whisper-echo
 %{_datadir}/whisper-echo/
 %{_mandir}/man1/whisper-echo.1.gz
+%{_libdir}/libggml*.so*
+%{_libdir}/libggml-base*.so*
+%{_libdir}/libwhisper*.so*
+%{_libdir}/libparakeet*.so*
+%{_datadir}/licenses/whisper-echo/whisper.cpp-LICENSE
+%doc docs/uinput.md
+
+%package devel
+Summary: Development files for whisper-echo
+Requires: %{name} = %{version}-%{release}
+
+%description -n %{name}-devel
+Development files for whisper-echo, including headers and CMake config.
 
 %files devel
 %{_includedir}/
-%{_libdir}/libggml*.so
-%{_libdir}/libwhisper*.so
-%{_libdir}/libparakeet*.so
 %{_libdir}/pkgconfig/*.pc
 %{_libdir}/cmake/
 

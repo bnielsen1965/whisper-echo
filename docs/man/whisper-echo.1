@@ -9,6 +9,16 @@ whisper\-echo \- real\-time streaming speech\-to\-text with Whisper and VAD
 provides real\-time streaming speech\-to\-text using OpenAI Whisper and voice activity detection.
 It captures audio from the default or specified input device, transcribes speech as it occurs,
 and optionally types the transcription via uinput.
+A Whisper model file is required for operation. The model path is specified with
+.B \-m
+or
+.B \-\-model
+and defaults to
+.I ~/.models/ggml-base.en.bin
+. If the model cannot be loaded, whisper\-echo will exit with an error. A Silero VAD model
+can be specified with
+.B \-vm
+and is optional but recommended for reliable speech detection.
 .SH OPTIONS
 .TP
 .BR \-h ", " \-\-help
@@ -41,6 +51,12 @@ Disable GPU inference.
 .BR \-nsv ", " \-\-no\-silero\-vad
 Disable Silero VAD, use energy\-based VAD.
 .SH FILES
+.TP
+.I ~/.models/ggml-base.en.bin
+Default Whisper model file. A valid model is required for operation.
+.TP
+.I ~/.models/ggml-silero-v6.2.0.bin
+Optional Silero VAD model for neural voice activity detection.
 .TP
 .I /usr/share/whisper\-echo/command.json
 Default voice commands.

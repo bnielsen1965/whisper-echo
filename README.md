@@ -47,9 +47,20 @@ git submodule update --init --recursive
 mkdir build && cd build
 cmake ..
 cmake --build . --config Release
+```
 
+**Models are required.** whisper-echo will not run without a Whisper model file. Download at least one model to `~/.models/` before running:
+
+```bash
+mkdir -p ~/.models
+# Example: download ggml-base.en.bin to ~/.models/
+# See Models section for download links
+```
+
+```bash
 # Run with default model
 ./whisper-echo
+```
 
 # Run with a specific model
 ./whisper-echo -m ~/.models/ggml-medium.en.bin
@@ -88,15 +99,25 @@ The uinput feature (`--uinput`) is Linux-only and requires:
 
 ## Models
 
-Place model files in `~/.models/`. The project ships with the following (git-ignored `.bin` files):
+**Models are required for operation.** whisper-echo will exit with an error if the Whisper model specified by `-m/--model` cannot be loaded. Place model files in `~/.models/`. The project ships with the following (git-ignored `.bin` files):
 
 | Model | File | Size | Description |
 |-------|------|------|-------------|
 | Whisper Base (English) | `ggml-base.en.bin` | ~148 MB | Fast, good for clear speech |
 | Whisper Medium (English) | `ggml-medium.en.bin` | ~1.5 GB | More accurate, handles noise better |
-| Silero VAD | `ggml-silero-v6.2.0.bin` | ~885 KB | Neural voice activity detection |
+| Silero VAD | `ggml-silero-v6.2.0.bin` | ~885 KB | Neural voice activity detection – optional but strongly recommended |
 
 Download Whisper models from [ggerganov/whisper.cpp#models](https://github.com/ggerganov/whisper.cpp#models) or [Hugging Face](https://huggingface.co/ggerganov/whisper.cpp).
+
+Example download for the default model:
+```bash
+mkdir -p ~/.models
+wget -O ~/.models/ggml-base.en.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/models/ggml-base.en.bin
+# Optional Silero VAD
+wget -O ~/.models/ggml-silero-v6.2.0.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/models/ggml-silero-v6.2.0.bin
+```
+
+> **Note:** At minimum one Whisper model must be present at the path given to `-m/--model` (default `~/.models/ggml-base.en.bin`). Without a valid model, whisper-echo will fail to start.
 
 ## Building
 
