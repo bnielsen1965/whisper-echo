@@ -1,0 +1,40 @@
+# Build directories
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+*.mk
+
+# Generated packages
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.rpm
+*.deb
+*.src.rpm
+_CPck_Packages/
+_CPack_Packages/
+
+# Compiled objects
+*.o
+*.so
+*.a
+*.so.*
+*.dylib
+
+# Logs and temp
+*.log
+*.tmp
+*~
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

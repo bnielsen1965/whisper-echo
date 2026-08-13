@@ -35,10 +35,9 @@ cmake --install build --prefix %{buildroot}%{_prefix}
 %{_bindir}/whisper-echo
 %{_datadir}/whisper-echo/
 %{_mandir}/man1/whisper-echo.1.gz
-%{_libdir}/libggml*.so*
-%{_libdir}/libggml-base*.so*
-%{_libdir}/libwhisper*.so*
-%{_libdir}/libparakeet*.so*
+%{_libdir}/libggml*.so.*
+%{_libdir}/libwhisper*.so.*
+%{_libdir}/libparakeet*.so.*
 %{_datadir}/licenses/whisper-echo/whisper.cpp-LICENSE
 %doc docs/uinput.md
 
@@ -50,9 +49,12 @@ Requires: %{name} = %{version}-%{release}
 Development files for whisper-echo, including headers and CMake config.
 
 %files devel
-%{_includedir}/
+%{_includedir}/*
 %{_libdir}/pkgconfig/*.pc
-%{_libdir}/cmake/
+%{_libdir}/cmake/*
+%{_libdir}/libggml*.so
+%{_libdir}/libwhisper*.so
+%{_libdir}/libparakeet*.so
 
 %changelog
 * Tue Aug 12 2026 Bryan Nielsen <bnielsen1965@gmail.com> - 0.1.0-1

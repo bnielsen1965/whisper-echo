@@ -430,15 +430,19 @@ cmake --build build
 cd build && cpack -G RPM
 ```
 
-The build produces `whisper-echo` and `whisper-echo-devel` packages in the `build/` directory. The spec is at `packaging/rpm/whisper-echo.spec`. For SRPM builds, create a source tarball with submodules:
+The build produces `whisper-echo` and `whisper-echo-devel` packages in the `build/` directory. Run `rpmlint` to check policy:
+```bash
+rpmlint build/whisper-echo-*.rpm
+```
+
+The spec is at `packaging/rpm/whisper-echo.spec`. For SRPM builds, create a source tarball with submodules:
 ```bash
 ./tools/make_dist.sh
 rpmbuild -ba packaging/rpm/whisper-echo.spec
 ```
-
-Run `rpmlint` to check policy:
+SRPMs and binary RPMs are placed in `~/rpmbuild/SRPMS/` and `~/rpmbuild/RPMS/x86_64/` respectively. Check policy with:
 ```bash
-rpmlint build/whisper-echo-*.rpm
+rpmlint ~/rpmbuild/RPMS/x86_64/whisper-echo-*.rpm
 ```
 
 ### Debian packaging
