@@ -131,8 +131,8 @@ bool stream_vad_init(stream_vad_state & state,
     // silence counter and keep the capture open.
     state.vad_neg_threshold = state.vad_threshold - 0.15f;
 
-    fprintf(stderr, "%s: Silero VAD initialized (model: %s)\n",
-            __func__, expanded_path.c_str());
+    fprintf(stderr, "%s: Silero VAD initialized (model: %s, device: CPU forced, threads: %d)\n",
+            __func__, expanded_path.c_str(), n_threads);
     return true;
 }
 

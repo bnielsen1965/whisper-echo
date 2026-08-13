@@ -59,6 +59,7 @@ struct whisper_params {
     bool use_silero_vad   = true;
     bool print_details    = false; // print transcription headers and timestamps
     bool print_status     = true;  // show status indicator (idle, listening, ...)
+    bool list_devices     = false; // list audio capture devices and exit
 
     std::string commands_file;  // Path to command.json for voice commands
 };
@@ -78,6 +79,7 @@ static bool whisper_params_parse(int argc, char ** argv, whisper_params & params
         else if (arg == "-m"    || arg == "--model")        { params.model       = argv[++i]; }
         else if (arg == "-f"    || arg == "--file")         { params.fname_out   = argv[++i]; }
         else if (arg == "-c"    || arg == "--capture")      { params.capture_id  = std::stoi(argv[++i]); }
+        else if (arg == "-L"    || arg == "--list-devices") { params.list_devices = true; }
         else if (arg == "-bs"   || arg == "--beam-size")    { params.beam_size   = std::stoi(argv[++i]); }
         else if (arg == "-ac"   || arg == "--audio-ctx")    { params.audio_ctx   = std::stoi(argv[++i]); }
         else if (arg == "--length")                         { params.length_ms   = std::stoi(argv[++i]); }
@@ -114,6 +116,7 @@ void whisper_print_usage(int /*argc*/, char ** argv, const whisper_params & para
     fprintf(stderr, "\n");
     fprintf(stderr, "options:\n");
     fprintf(stderr, "  -h,        --help            show this help message and exit\n");
+    fprintf(stderr, "  -L,        --list-devices    list audio capture devices and exit\n");
     fprintf(stderr, "  -t N,      --threads N      [%-7d] number of threads to use during computation\n",    params.n_threads);
     fprintf(stderr, "            --length N         [%-7d] audio length in milliseconds\n",                   params.length_ms);
     fprintf(stderr, "  -c ID,     --capture ID     [%-7d] capture device ID\n",                              params.capture_id);
@@ -152,6 +155,24 @@ int main(int argc, char ** argv) {
 
     if (whisper_params_parse(argc, argv, params) == false) {
         return 1;
+    }
+
+    if (params.list_devices) {
+        if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+            fprintf(stderr, "error: SDL_Init failed: %s\n", SDL_GetError());
+            return 1;
+        }
+        int nDevices = SDL_GetNumAudioDevices(SDL_TRUE);
+        // Machine-readable output: JSON array, include -1 for default
+        printf("[\n");
+        printf("  {\"id\": -1, \"name\": \"default\"}%s\n", nDevices > 0 ? "," : "");
+        for (int i = 0; i < nDevices; i++) {
+            const char * name = SDL_GetAudioDeviceName(i, SDL_TRUE);
+            printf("  {\"id\": %d, \"name\": \"%s\"}%s\n", i, name ? name : "", i + 1 < nDevices ? "," : "");
+        }
+        printf("]\n");
+        SDL_Quit();
+        return 0;
     }
 
     // Warn if VAD-simple flags are set but Silero VAD is active
@@ -203,6 +224,11 @@ int main(int argc, char ** argv) {
         fprintf(stderr, "error: failed to initialize whisper context\n");
         return 2;
     }
+    fprintf(stderr, "%s: Whisper initialized (model: %s, gpu: %s, device: %d, threads: %d)\n",
+            __func__, model_path.c_str(),
+            params.use_gpu ? "yes" : "no",
+            params.gpu_device,
+            params.n_threads);
 
     std::vector<float> pcmf32(n_samples_30s, 0.0f);
 

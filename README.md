@@ -112,9 +112,10 @@ cmake -DGGML_VULKAN=OFF -DGGML_CUDA=OFF -DGGML_METAL=OFF -DGGML_HIP=ON ..
 | Short | Long | Default | Description |
 |-------|------|---------|-------------|
 | `-h` | `--help` | — | Show help |
+| `-L` | `--list-devices` | false | List audio capture devices as JSON and exit |
 | `-t` | `--threads` | min(4, CPU cores) | Number of threads for inference |
 | `--length` | — | 60000 | Audio buffer depth in milliseconds |
-| `-c` | `--capture` | -1 | Capture device ID (use -1 for default; list devices on startup) |
+| `-c` | `--capture` | -1 | Capture device ID (use -1 for default; use --list-devices to enumerate) |
 | `-bs` | `--beam-size` | -1 | Beam search size (-1 = greedy decoding) |
 | `-ac` | `--audio-ctx` | 0 | Maximum audio context length in tokens (0 = send all) |
 | `-vth` | `--vad-thold` | 0.6 | Energy-based VAD threshold |
@@ -143,6 +144,9 @@ cmake -DGGML_VULKAN=OFF -DGGML_CUDA=OFF -DGGML_METAL=OFF -DGGML_HIP=ON ..
 ```bash
 # Basic usage — English, base model, energy-based VAD
 ./whisper-echo
+
+# List available capture devices as JSON
+./whisper-echo --list-devices
 
 # Spanish transcription with medium model
 ./whisper-echo -l es -m ~/.models/ggml-medium.en.bin
