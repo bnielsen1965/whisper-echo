@@ -7,7 +7,7 @@ URL:            https://github.com/bnielsen1965/whisper-echo
 Source0:        %{name}-%{version}.tar.gz
 Source1:        whisper.cpp-%{version}.tar.gz
 BuildRequires:  cmake >= 3.16, gcc-c++, make, SDL2-devel, vulkan-devel
-Requires:       sdl2 >= 2.0.0
+Requires:       libSDL2-2.0.so.0
 BuildArch:      x86_64
 
 %description
