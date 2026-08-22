@@ -1,3 +1,9 @@
+whisper-echo (0.2.0-1) unstable; urgency=medium
+
+  * Removed default Silero VAD model; no model-based VAD unless --vad-model is set
+
+ -- Bryan Nielsen <bnielsen1965@gmail.com>  Fri, 21 Aug 2026 00:00:00 +0000
+
 whisper-echo (a7331e0-1) unstable; urgency=medium
 
   * Automated changelog update for version a7331e0-1

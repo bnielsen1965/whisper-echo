@@ -176,7 +176,7 @@ cmake -DGGML_VULKAN=OFF -DGGML_CUDA=OFF -DGGML_METAL=OFF -DGGML_HIP=ON ..
 | `-ng` | `--no-gpu` | false | Disable GPU inference (CPU only) |
 | `-gd` | `--gpu-device` | 0 | GPU device ID |
 | `-nfa` | `--no-flash-attn` | false | Disable flash attention |
-| `-vm` | `--vad-model` | ~/.models/ggml-silero-v6.2.0.bin | Path to Silero VAD model file |
+| `-vm` | `--vad-model` | *(none)* | Path to Silero VAD model file (no VAD model used if not specified) |
 | `-nsv` | `--no-silero-vad` | false | Disable Silero VAD (use energy-based fallback) |
 | `-d` | `--detail` | false | Print transcription timestamps and headers |
 | `-ns` | `--no-status` | false | Hide the status indicator |

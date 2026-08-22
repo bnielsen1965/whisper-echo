@@ -55,7 +55,7 @@ struct whisper_params {
     std::string model    = "~/.models/ggml-base.en.bin";
     std::string fname_out;
 
-    std::string vad_model = "~/.models/ggml-silero-v6.2.0.bin";
+    std::string vad_model;
     bool use_silero_vad   = true;
     bool print_details    = false; // print transcription headers and timestamps
     bool print_status     = true;  // show status indicator (idle, listening, ...)
@@ -258,11 +258,13 @@ int main(int argc, char ** argv) {
     // Initialize streaming VAD
     stream_vad_state vad_state;
     bool use_silero = false;
-    if (params.use_silero_vad) {
+    if (params.use_silero_vad && !params.vad_model.empty()) {
         use_silero = stream_vad_init(vad_state, params.vad_model, params.n_threads, params.use_gpu, params.gpu_device);
         if (!use_silero) {
             fprintf(stderr, "%s: Silero VAD not available, using vad_simple fallback\n", __func__);
         }
+    } else if (params.use_silero_vad && params.vad_model.empty()) {
+        fprintf(stderr, "%s: no VAD model specified, using vad_simple fallback\n", __func__);
     }
     vad_state.vad_gain = params.vad_gain;
 
